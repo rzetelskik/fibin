@@ -9,9 +9,9 @@ struct Fib<1> : std::integral_constant<int, 1> {};
 template<>
 struct Fib<0> : std::integral_constant<int, 0> {};
 
-struct True : std::bool_constant<true> {};
+struct True : std::__bool_constant<true> {};
 
-struct False : std::bool_constant<false> {};
+struct False : std::__bool_constant<false> {};
 
 template<typename T, typename = typename std::enable_if<(
         std::is_same<T, True>::value ||
