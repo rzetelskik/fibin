@@ -1,9 +1,9 @@
 #include "fibin.h"
 
 #define BOOST_TEST_MODULE tests
+#include <iostream>
 #include <boost/test/included/unit_test.hpp>
 #include <boost/test/output_test_stream.hpp>
-#include <iostream>
 
 struct cout_redirect {
     cout_redirect(std::streambuf * new_buffer) : old( std::cout.rdbuf(new_buffer)) {}
@@ -20,6 +20,16 @@ BOOST_AUTO_TEST_CASE(fib) {
     BOOST_STATIC_ASSERT(Fib<0>::value == 0);
     BOOST_STATIC_ASSERT(Fib<1>::value == 1);
     BOOST_STATIC_ASSERT(Fib<21>::value == 10946);
+}
+
+BOOST_AUTO_TEST_CASE(booleans) {
+    BOOST_STATIC_ASSERT(True::value);
+    BOOST_STATIC_ASSERT(!False::value);
+}
+
+BOOST_AUTO_TEST_CASE(lit) {
+    BOOST_STATIC_ASSERT(Lit<True>::value);
+    BOOST_STATIC_ASSERT(!Lit<False>::value);
 }
 
 //BOOST_AUTO_TEST_CASE(provided) {
