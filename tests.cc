@@ -30,6 +30,9 @@ BOOST_AUTO_TEST_CASE(booleans) {
 BOOST_AUTO_TEST_CASE(lit) {
     BOOST_STATIC_ASSERT(Lit<True>::value);
     BOOST_STATIC_ASSERT(!Lit<False>::value);
+    BOOST_STATIC_ASSERT(Lit<Fib<0>>::value == 0);
+    BOOST_STATIC_ASSERT(Lit<Fib<1>>::value == 1);
+    BOOST_STATIC_ASSERT(Lit<Fib<21>>::value == 10946);
 }
 
 //BOOST_AUTO_TEST_CASE(provided) {
