@@ -1,26 +1,32 @@
 #include <iostream>
 
+class AbstractLiteral {
+public:
+    virtual ~AbstractLiteral() = 0;
+};
+
 template <int n>
-struct Fib : std::integral_constant<int, Fib<n- 1>::value + Fib<n - 2>::value> {};
+class Fib : private AbstractLiteral, public std::integral_constant<int, Fib<n - 1>::value + Fib<n - 2>::value> {};
 
 template<>
-struct Fib<1> : std::integral_constant<int, 1> {};
+class Fib<1> : private AbstractLiteral, public std::integral_constant<int, 1> {};
 
 template<>
-struct Fib<0> : std::integral_constant<int, 0> {};
+class Fib<0> : private AbstractLiteral, public std::integral_constant<int, 0> {};
 
-struct True : std::__bool_constant<true> {};
+class True : private AbstractLiteral, public std::__bool_constant<true> {};
 
-struct False : std::__bool_constant<false> {};
+class False : private AbstractLiteral, public std::__bool_constant<false> {};
 
-template<typename T, typename = typename std::enable_if<(
-        std::is_same<T, True>::value ||
-        std::is_same<T, False>::value)>::type>
-struct Lit {};
+template<typename T, typename = typename std::enable_if<std::is_base_of<AbstractLiteral, T>::value>::type>
+class Lit {};
 
-template<>
-struct Lit<True> : True {};
+template<int n>
+class Lit<Fib<n>> : public Fib<n> {};
 
 template<>
-struct Lit<False> : False {};
+class Lit<True> : public True {};
+
+template<>
+class Lit<False> : public False {};
 
