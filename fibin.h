@@ -2,131 +2,109 @@
 #include <type_traits>
 
 template<uint64_t n>
-class Fib {};
+struct Fib {};
 
 template<typename T>
-class isFib {
-public:
-    static constexpr bool value = false;
-};
+struct isFib : public std::false_type {};
 
 template<uint64_t n>
-class isFib<Fib<n>> {
-public:
-    static constexpr bool value = true;
-};
+struct isFib<Fib<n>> : public std::true_type {};
 
-class True {};
+struct True {};
 
-class False {};
+struct False {};
 
 template<typename T>
-class isBoolean {
-public:
-    static constexpr bool value = false;
-};
+struct isBoolean : public std::false_type {};
 
 template<>
-class isBoolean<True> {
-public:
-    static constexpr bool value = true;
-};
+struct isBoolean<True> : public std::true_type {};
 
 template<>
-class isBoolean<False> {
-public:
-    static constexpr bool value = true;
-};
+struct isBoolean<False> : public std::true_type {};
 
 template<typename T, typename = typename std::enable_if<(isBoolean<T>::value || isFib<T>::value)>::type>
-class Lit {};
+struct Lit {};
 
 template<uint64_t n>
-class Lit<Fib<n>> {};
+struct Lit<Fib<n>> {};
 
 template<>
-class Lit<True> {};
+struct Lit<True> {};
 
 template<>
-class Lit<False> {};
+struct Lit<False> {};
 
 template<typename T>
-class isLit : std::false_type {};
+struct isLit : std::false_type {};
 
 template<>
-class isLit<Lit<True>> : std::true_type {};
+struct isLit<Lit<True>> : std::true_type {};
 
 template<>
-class isLit<Lit<False>> : std::true_type {};
+struct isLit<Lit<False>> : std::true_type {};
 
 template<uint64_t n>
-class isLit<Lit<Fib<n>>> : std::true_type {};
+struct isLit<Lit<Fib<n>>> : std::true_type {};
 
 template<typename Condition, typename Then, typename Else>
-class If {};
+struct If {};
 
 template<typename Left, typename Right>
-class Eq {};
+struct Eq {};
 
 using ValueType = uint64_t;
 
 template<typename T>
-class Eval {};
+struct Eval {};
 
 template<>
-class Eval<True> : public std::true_type {};
+struct Eval<True> : public std::true_type {};
 
 template<>
-class Eval<False> : public std::false_type {};
+struct Eval<False> : public std::false_type {};
 
 template<uint64_t n>
-class Eval<Fib<n>> : public std::integral_constant<ValueType, Eval<Fib<n - 1>>::value + Eval<Fib<n - 2>>::value> {};
+struct Eval<Fib<n>> : public std::integral_constant<ValueType, Eval<Fib<n - 1>>::value + Eval<Fib<n - 2>>::value> {};
 
 template<>
-class Eval<Fib<1>> : public std::integral_constant<ValueType, 1> {};
+struct Eval<Fib<1>> : public std::integral_constant<ValueType, 1> {};
 
 template<>
-class Eval<Fib<0>> : public std::integral_constant<ValueType, 0> {};
+struct Eval<Fib<0>> : public std::integral_constant<ValueType, 0> {};
 
 template<>
-class Eval<Lit<True>> {
-public:
+struct Eval<Lit<True>> {
     using result = Eval<True>;
 };
 
 template<>
-class Eval<Lit<False>> {
-public:
+struct Eval<Lit<False>> {
     using result = Eval<False>;
 };
 
 template<ValueType n>
-class Eval<Lit<Fib<n>>> {
-public:
+struct Eval<Lit<Fib<n>>> {
     using result = Eval<Fib<n>>;
 };
 
 template<typename Then, typename Else>
-class Eval<If<True, Then, Else>> {
-public:
+struct Eval<If<True, Then, Else>> {
     using result = typename Eval<Then>::result;
 };
 
 template<typename Then, typename Else>
-class Eval<If<False, Then, Else>> {
-public:
+struct Eval<If<False, Then, Else>> {
     using result = typename Eval<Else>::result;
 };
 
 template<typename Condition, typename Then, typename Else>
-class Eval<If<Condition, Then, Else>> {
-public:
+struct Eval<If<Condition, Then, Else>> {
     using result = typename Eval<If<Eval<Condition>, Then, Else>>::result;
 };
 
 template<typename ValueType>
-class Fibin {
-public:
+struct Fibin {
     template<typename Expr, typename V = ValueType>
     static constexpr typename std::enable_if<std::is_integral<V>::value, V>::type
     eval() {
