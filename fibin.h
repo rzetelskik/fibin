@@ -4,15 +4,15 @@
 template<uint64_t n>
 struct Fib {};
 
+struct True : public std::true_type {};
+
+struct False : public std::false_type {};
+
 template<typename T>
 struct isFib : public std::false_type {};
 
 template<uint64_t n>
 struct isFib<Fib<n>> : public std::true_type {};
-
-struct True {};
-
-struct False {};
 
 template<typename T>
 struct isBoolean : public std::false_type {};
@@ -56,12 +56,6 @@ struct Eq {};
 template<typename V, typename T>
 struct Eval {};
 
-template<typename V>
-struct Eval<V, True> : public std::true_type {};
-
-template<typename V>
-struct Eval<V, False> : public std::false_type {};
-
 template<typename V, uint64_t n>
 struct Eval<V, Fib<n>> : public std::integral_constant<V, Eval<V, Fib<n - 1>>::value + Eval<V, Fib<n - 2>>::value> {};
 
@@ -73,12 +67,12 @@ struct Eval<V, Fib<0>> : public std::integral_constant<V, 0> {};
 
 template<typename V>
 struct Eval<V, Lit<True>> {
-    using result = Eval<V, True>;
+    using result = True;
 };
 
 template<typename V>
 struct Eval<V, Lit<False>> {
-    using result = Eval<V, False>;
+    using result = False;
 };
 
 template<typename V, uint64_t n>
@@ -98,7 +92,7 @@ struct Eval<V, If<False, Then, Else>> {
 
 template<typename V, typename Condition, typename Then, typename Else>
 struct Eval<V, If<Condition, Then, Else>> {
-    using result = typename Eval<V, If<Eval<V, Condition>, Then, Else>>::result;
+    using result = typename Eval<V, If<typename Eval<V, Condition>::result, Then, Else>>::result;
 };
 
 template<typename ValueType>
