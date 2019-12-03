@@ -53,54 +53,52 @@ struct If {};
 template<typename Left, typename Right>
 struct Eq {};
 
-using ValueType = uint64_t;
-
-template<typename T>
+template<typename V, typename T>
 struct Eval {};
 
-template<>
-struct Eval<True> : public std::true_type {};
+template<typename V>
+struct Eval<V, True> : public std::true_type {};
 
-template<>
-struct Eval<False> : public std::false_type {};
+template<typename V>
+struct Eval<V, False> : public std::false_type {};
 
-template<uint64_t n>
-struct Eval<Fib<n>> : public std::integral_constant<ValueType, Eval<Fib<n - 1>>::value + Eval<Fib<n - 2>>::value> {};
+template<typename V, uint64_t n>
+struct Eval<V, Fib<n>> : public std::integral_constant<V, Eval<V, Fib<n - 1>>::value + Eval<V, Fib<n - 2>>::value> {};
 
-template<>
-struct Eval<Fib<1>> : public std::integral_constant<ValueType, 1> {};
+template<typename V>
+struct Eval<V, Fib<1>> : public std::integral_constant<V, 1> {};
 
-template<>
-struct Eval<Fib<0>> : public std::integral_constant<ValueType, 0> {};
+template<typename V>
+struct Eval<V, Fib<0>> : public std::integral_constant<V, 0> {};
 
-template<>
-struct Eval<Lit<True>> {
-    using result = Eval<True>;
+template<typename V>
+struct Eval<V, Lit<True>> {
+    using result = Eval<V, True>;
 };
 
-template<>
-struct Eval<Lit<False>> {
-    using result = Eval<False>;
+template<typename V>
+struct Eval<V, Lit<False>> {
+    using result = Eval<V, False>;
 };
 
-template<ValueType n>
-struct Eval<Lit<Fib<n>>> {
-    using result = Eval<Fib<n>>;
+template<typename V, uint64_t n>
+struct Eval<V, Lit<Fib<n>>> {
+    using result = Eval<V, Fib<n>>;
 };
 
-template<typename Then, typename Else>
-struct Eval<If<True, Then, Else>> {
-    using result = typename Eval<Then>::result;
+template<typename V, typename Then, typename Else>
+struct Eval<V, If<True, Then, Else>> {
+    using result = typename Eval<V, Then>::result;
 };
 
-template<typename Then, typename Else>
-struct Eval<If<False, Then, Else>> {
-    using result = typename Eval<Else>::result;
+template<typename V, typename Then, typename Else>
+struct Eval<V, If<False, Then, Else>> {
+    using result = typename Eval<V, Else>::result;
 };
 
-template<typename Condition, typename Then, typename Else>
-struct Eval<If<Condition, Then, Else>> {
-    using result = typename Eval<If<Eval<Condition>, Then, Else>>::result;
+template<typename V, typename Condition, typename Then, typename Else>
+struct Eval<V, If<Condition, Then, Else>> {
+    using result = typename Eval<V, If<Eval<V, Condition>, Then, Else>>::result;
 };
 
 template<typename ValueType>
@@ -108,7 +106,7 @@ struct Fibin {
     template<typename Expr, typename V = ValueType>
     static constexpr typename std::enable_if<std::is_integral<V>::value, V>::type
     eval() {
-        return Eval<Expr>::result::value;
+        return Eval<V, Expr>::result::value;
     }
 
     template<typename Expr, typename V = ValueType>
