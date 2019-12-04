@@ -1,6 +1,30 @@
 #include <iostream>
 #include <type_traits>
 
+namespace {
+    constexpr void checkNullptr(const char* arg) {
+        if (!arg)
+            throw std::invalid_argument("Invalid argument provided.");
+    }
+
+    constexpr void checkIsAlnum(int c) {
+        if (!((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')))
+            throw std::invalid_argument("Non-alphanumeric character provided.");
+    }
+
+    constexpr int toLower(int c) {
+        if (c >= 'A' && c <= 'Z') {
+            c |= 32;
+        }
+        return c;
+    }
+
+    constexpr void checkLength(int len, int maxLen, const char* arg) {
+        if (!len || (len == maxLen && arg[maxLen] != '\0'))
+            throw std::range_error("Invalid variable name size provided.");
+    }
+}
+
 template<uint64_t n>
 struct Fib {};
 
@@ -46,6 +70,23 @@ struct Lit {};
 //
 //template<uint64_t n>
 //struct isLit<Lit<Fib<n>>> : std::true_type {};
+
+constexpr uint64_t Var(const char* arg) {
+    checkNullptr(arg);
+
+    constexpr int maxLen = 6;
+    int len = 0, c = 0;
+
+    uint64_t id = 0;
+    while (len < maxLen && (c = arg[len]) != '\0') {
+        checkIsAlnum(c);
+        id = (id << 8) | toLower(c);
+        ++len;
+    }
+
+    checkLength(len, maxLen, arg);
+    return id;
+};
 
 template<typename Condition, typename Then, typename Else>
 struct If {};
