@@ -16,6 +16,28 @@ private:
     std::streambuf * old;
 };
 
+BOOST_AUTO_TEST_CASE(sum_test) {
+    BOOST_STATIC_ASSERT(2 == Fibin<int>::eval<Sum<Lit<Fib<1>>, Lit<Fib<1>>>>());
+    BOOST_STATIC_ASSERT(4 == Fibin<int>::eval<Sum<Lit<Fib<3>>, Lit<Fib<3>>>>());
+    BOOST_STATIC_ASSERT(5 == Fibin<int>::eval<Sum<Lit<Fib<5>>, Lit<Fib<0>>>>());
+
+
+//    BOOST_STATIC_ASSERT(6 == Fibin<int>::eval<Sum<Lit<Fib<5>>, Lit<Fib<0>>, Lit<Fib<1>>>>());
+//    BOOST_STATIC_ASSERT(7 == Fibin<int>::eval<Sum<Fib<5>, Sum<Fib<1>, Fib<1>>>>());
+
+//  BOOST_STATIC_ASSERT(3 == Fibin<int>::eval<Sum<Fib<1>, Fib<1>, Fib<1>>>);
+}
+
+BOOST_AUTO_TEST_CASE(eq_test) {
+//    BOOST_STATIC_ASSERT(Fibin<int>::eval<Eq<Lit<Fib<1>>, Lit<Fib<1>>>>());
+    BOOST_STATIC_ASSERT(Fibin<int>::eval<If<Eq<Lit<Fib<1>>, Lit<Fib<1>>>, Lit<Fib<1>>, Lit<Fib<0>>>>() == 1);
+    BOOST_STATIC_ASSERT(Fibin<int>::eval<If<Eq<Lit<Fib<0>>, Lit<Fib<1>>>, Lit<Fib<1>>, Lit<Fib<0>>>>() == 0);
+}
+
+BOOST_AUTO_TEST_CASE(if_test) {
+    BOOST_STATIC_ASSERT(Fibin<int>::eval<If<Lit<True>, Lit<Fib<1>>, Lit<Fib<0>>>>() == 1);
+}
+
 BOOST_AUTO_TEST_CASE(eval_void) {
     boost::test_tools::output_test_stream output;
     {
@@ -28,11 +50,18 @@ BOOST_AUTO_TEST_CASE(eval_void) {
 }
 
 BOOST_AUTO_TEST_CASE(eval_type) {
-    BOOST_STATIC_ASSERT(1 == Fibin<short>::eval<Lit<True>>());
     BOOST_STATIC_ASSERT(1 == Fibin<int16_t>::eval<Lit<Fib<1>>>());
     BOOST_STATIC_ASSERT(6765 == Fibin<uint64_t>::eval<Lit<Fib<20>>>());
-//    BOOST_STATIC_ASSERT(0 == Fibin<uint64_t>::eval<If<Lit<True>, Lit<Fib<0>>, Lit<Fib<1>>>>());
-//    BOOST_STATIC_ASSERT(1 == Fibin<uint64_t>::eval<If<Lit<False>, Lit<Fib<0>>, Lit<Fib<1>>>>());
+    BOOST_STATIC_ASSERT(0 == Fibin<uint64_t>::eval<If<Lit<True>, Lit<Fib<0>>, Lit<Fib<1>>>>());
+    BOOST_STATIC_ASSERT(1 == Fibin<uint64_t>::eval<If<Lit<False>, Lit<Fib<0>>, Lit<Fib<1>>>>());
+}
+
+BOOST_AUTO_TEST_CASE(var) {
+    BOOST_STATIC_ASSERT(49 == Var("1"));
+    BOOST_STATIC_ASSERT(Var("1") == Var("1"));
+    BOOST_STATIC_ASSERT(Var("abC") == Var("Abc"));
+    BOOST_CHECK_THROW(Var("[]"), std::invalid_argument);
+    BOOST_CHECK_THROW(Var("abcdefg"), std::range_error);
 }
 
 BOOST_AUTO_TEST_CASE(provided) {
