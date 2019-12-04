@@ -34,6 +34,14 @@ BOOST_AUTO_TEST_CASE(eval_type) {
     BOOST_STATIC_ASSERT(1 == Fibin<uint64_t>::eval<If<Lit<False>, Lit<Fib<0>>, Lit<Fib<1>>>>());
 }
 
+BOOST_AUTO_TEST_CASE(var) {
+    BOOST_STATIC_ASSERT(49 == Var("1"));
+    BOOST_STATIC_ASSERT(Var("1") == Var("1"));
+    BOOST_STATIC_ASSERT(Var("abC") == Var("Abc"));
+    BOOST_CHECK_THROW(Var("[]"), std::invalid_argument);
+    BOOST_CHECK_THROW(Var("abcdefg"), std::range_error);
+}
+
 BOOST_AUTO_TEST_CASE(provided) {
 //    // Testing: lambda(x) {x + (Fib(1) + Fib(10)) + Fib(2)}(Fib(3))
 //    // Fib(0) = 0, Fib(1) = 1, Fib(2) = 1, Fib(3) = 2, Fib(10) = 55
