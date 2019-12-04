@@ -96,38 +96,57 @@ struct Ref {};
 template<typename Condition, typename Then, typename Else>
 struct If {};
 
+template<typename First, typename Second, typename ... Args>
+struct Sum {};
+
+template<typename T>
+struct Inc1 {};
+
+template<typename T>
+struct Inc10 {};
+
 template<typename Left, typename Right>
 struct Eq {};
 
 template<typename ValueType>
 struct Fibin {
 private:
+    template<ValueType n>
+    struct Integral {
+        static constexpr ValueType value = n;
+    };
+
+    template<ValueType n>
+    struct Boolean {
+        static constexpr ValueType value = n;
+    };
+
     template<typename Expr, typename Env>
     struct Eval {};
 
-    template<typename T, typename Env>
-    struct Eval<Lit<T>, Env> {
-        using result = Lit<T>;
-    };
-
-    template<uint64_t n, typename Env>
-    struct Eval<Fib<n>, Env> {
-        static constexpr ValueType value = Eval<Fib<n - 1>, Env>::value + Eval<Fib<n - 2>, Env>::value;
+    template<typename Env>
+    struct Eval<Lit<True>, Env> {
+        using result = Boolean<1>;
     };
 
     template<typename Env>
-    struct Eval<Fib<1>, Env> {
-        static const ValueType value = 1;
+    struct Eval<Lit<False>, Env> {
+        using result = Boolean<0>;
     };
 
     template<typename Env>
-    struct Eval<Fib<0>, Env> {
-        static const ValueType value = 0;
+    struct Eval<Lit<Fib<1>>, Env> {
+        using result = Integral<1>;
+    };
+
+    template<typename Env>
+    struct Eval<Lit<Fib<0>>, Env> {
+        using result = Integral<0>;
     };
 
     template<uint64_t n, typename Env>
     struct Eval<Lit<Fib<n>>, Env> {
-        using result = Eval<Fib<n>, Env>;
+        using result = Integral<Eval<Lit<Fib<n - 1>>, Env>::result::value + Eval<Lit<Fib<n - 2>>, Env>::result::value>;
     };
 
     template<typename Then, typename Else, typename Env>
@@ -143,6 +162,41 @@ private:
     template<typename Condition, typename Then, typename Else, typename Env>
     struct Eval<If<Condition, Then, Else>, Env> {
         using result = typename Eval<If<typename Eval<Condition, Env>::result, Then, Else>, Env>::result;
+    };
+
+    template<typename First, typename Second, typename ... Args, typename Env>
+    struct Eval<Sum<First, Second, Args ...>, Env> {
+        using result = Integral<Eval<First, Env>::result::value + Eval<Sum<Second, Args ...>, Env>::result::value>;
+    };
+
+    template<typename First, typename Second, typename Env>
+    struct Eval<Sum<First, Second>, Env> {
+        using result = Integral<Eval<First, Env>::result::value + Eval<Second, Env>::result::value>;
+    };
+
+    template<typename T, typename Env>
+    struct Eval<Inc1<T>, Env> {
+        using result = typename Eval<Sum<T, Lit<Fib<1>>>, Env>::result;
+    };
+
+    template<typename T, typename Env>
+    struct Eval<Inc10<T>, Env> {
+        using result = typename Eval<Sum<T, Lit<Fib<10>>>, Env>::result;
+    };
+
+    template<typename Left, typename Right, typename Env>
+    struct Eval<Eq<Left, Right>, Env> {
+        using result = typename Eval<Eq<typename Eval<Left, Env>::result, typename Eval<Right, Env>::result>, Env>::result;
+    };
+
+    template<ValueType n, ValueType m, typename Env>
+    struct Eval<Eq<Integral<n>, Integral<m>>, Env> {
+        using result = typename Eval<Lit<False>, Env>::result;
+    };
+
+    template<ValueType n, typename Env>
+    struct Eval<Eq<Integral<n>, Integral<n>>, Env> {
+        using result = typename Eval<Lit<True>, Env>::result;
     };
 
     template<uint64_t varId, typename Env>

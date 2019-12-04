@@ -42,27 +42,50 @@ BOOST_AUTO_TEST_CASE(var) {
     BOOST_CHECK_THROW(Var("abcdefg"), std::range_error);
 }
 
+BOOST_AUTO_TEST_CASE(sum) {
+    BOOST_STATIC_ASSERT(2 == Fibin<int>::eval<Sum<Lit<Fib<1>>, Lit<Fib<1>>>>());
+    BOOST_STATIC_ASSERT(4 == Fibin<int>::eval<Sum<Lit<Fib<3>>, Lit<Fib<3>>>>());
+    BOOST_STATIC_ASSERT(5 == Fibin<int>::eval<Sum<Lit<Fib<5>>, Lit<Fib<0>>>>());
+    BOOST_STATIC_ASSERT(3 == Fibin<int>::eval<Sum<Lit<Fib<1>>, Lit<Fib<1>>, Lit<Fib<1>>>>());
+}
+
+BOOST_AUTO_TEST_CASE(inc1) {
+    BOOST_STATIC_ASSERT(1 == Fibin<int>::eval<Inc1<Lit<Fib<0>>>>());
+    BOOST_STATIC_ASSERT(4 == Fibin<int>::eval<Inc1<Lit<Fib<4>>>>());
+}
+
+BOOST_AUTO_TEST_CASE(inc10) {
+    BOOST_STATIC_ASSERT(55 == Fibin<int>::eval<Inc10<Lit<Fib<0>>>>());
+    BOOST_STATIC_ASSERT(56 == Fibin<int>::eval<Inc10<Lit<Fib<2>>>>());
+}
+
+BOOST_AUTO_TEST_CASE(eq) {
+    BOOST_STATIC_ASSERT(Fibin<int>::eval<Eq<Lit<Fib<1>>, Lit<Fib<1>>>>() == 1);
+    BOOST_STATIC_ASSERT(Fibin<bool>::eval<Eq<Lit<Fib<1>>, Lit<Fib<0>>>>() == false);
+    BOOST_STATIC_ASSERT(Fibin<uint64_t>::eval<Eq<Lit<Fib<3>>, Sum<Lit<Fib<2>>, Lit<Fib<1>>>>>() == 1);
+}
+
 BOOST_AUTO_TEST_CASE(provided) {
 //    // Testing: lambda(x) {x + (Fib(1) + Fib(10)) + Fib(2)}(Fib(3))
 //    // Fib(0) = 0, Fib(1) = 1, Fib(2) = 1, Fib(3) = 2, Fib(10) = 55
 //    BOOST_STATIC_ASSERT(59 == Fibin<uint64_t>::eval<Invoke<Lambda<Var("x"),
 //                  Sum<Ref<Var("x")>, Inc10<Lit<Fib<1>>>, Lit<Fib<2>>>>, Lit<Fib<3>>>>());
 //
-//    // Testing: if False then Fib(0) else Fib(1)
-//    BOOST_STATIC_ASSERT(1 == Fibin<uint8_t>::eval<If<Lit<False>, Lit<Fib<0>>, Lit<Fib<1>>>>());
+    // Testing: if False then Fib(0) else Fib(1)
+    BOOST_STATIC_ASSERT(1 == Fibin<uint8_t>::eval<If<Lit<False>, Lit<Fib<0>>, Lit<Fib<1>>>>());
 //
 //    // Testing: let z = Fib(0) in {z + Fib(1)}
 //    BOOST_STATIC_ASSERT(1 == Fibin<int16_t>::eval<Let<Var("z"), Lit<Fib<0>>, Inc1<Ref<Var("Z")>>>>());
 //
 //
-//    boost::test_tools::output_test_stream output;
-//    {
-//        cout_redirect guard(output.rdbuf());
-//        // Prints out to std::cout: "Fibin doesn't support: PKc"
-//        Fibin<const char*>::eval<Lit<Fib<0>>>();
-//    }
-//
-//    BOOST_CHECK(output.is_equal("Fibin doesn't support: PKc\n"));
+    boost::test_tools::output_test_stream output;
+    {
+        cout_redirect guard(output.rdbuf());
+        // Prints out to std::cout: "Fibin doesn't support: PKc"
+        Fibin<const char*>::eval<Lit<Fib<0>>>();
+    }
+
+    BOOST_CHECK(output.is_equal("Fibin doesn't support: PKc\n"));
 }
 
 /**
