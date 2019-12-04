@@ -1,6 +1,31 @@
 #include <iostream>
 #include <type_traits>
 
+namespace {
+    constexpr bool isDigit(int c) {
+        return (unsigned)c - '0' < 10;
+    }
+
+    constexpr bool isAlpha(int c) {
+        return ((unsigned)c | 32) - 'a' < 26;
+    }
+
+    constexpr bool isAlnum(int c) {
+        return isDigit(c) | isAlpha(c);
+    }
+
+    constexpr bool isUpper(int c) {
+        return (unsigned)c - 'A' < 26;
+    }
+
+    constexpr int toLower(int c) {
+        if (isUpper(c)) {
+            c |= 32;
+        }
+        return c;
+    }
+}
+
 template<uint64_t n>
 struct Fib {};
 
@@ -46,6 +71,27 @@ struct Lit {};
 //
 //template<uint64_t n>
 //struct isLit<Lit<Fib<n>>> : std::true_type {};
+
+constexpr uint64_t Var(const char* arg) {
+    if (!arg) throw std::invalid_argument("Invalid argument provided.");
+
+    constexpr int maxLen = 6;
+    int len = 0, c = 0;
+
+    uint64_t id = 0;
+    while (len < maxLen && (c = arg[len]) != '\0') {
+        if (!isAlnum(c)) throw std::invalid_argument("Non-alphanumeric character provided.");
+
+        id = (id << 8) | toLower(c);
+        ++len;
+    }
+
+    if (!len || (len == maxLen && arg[maxLen] != '\0')) throw std::range_error("Invalid variable name size provided.");
+    return id;
+};
+
+template<uint64_t varId>
+struct Ref {};
 
 template<typename Condition, typename Then, typename Else>
 struct If {};
@@ -97,6 +143,11 @@ private:
     template<typename Condition, typename Then, typename Else, typename Env>
     struct Eval<If<Condition, Then, Else>, Env> {
         using result = typename Eval<If<typename Eval<Condition, Env>::result, Then, Else>, Env>::result;
+    };
+
+    template<uint64_t varId, typename Env>
+    struct Eval<Ref<varId>, Env> {
+        //
     };
 
 public:
