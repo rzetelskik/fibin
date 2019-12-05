@@ -49,27 +49,6 @@ struct isBoolean<False> : public std::true_type {};
 template<typename T, typename = typename std::enable_if<(isBoolean<T>::value || isFib<T>::value)>::type>
 struct Lit {};
 
-//template<uint64_t n>
-//struct Lit<Fib<n>> {};
-
-//template<>
-//struct Lit<True> {};
-//
-//template<>
-//struct Lit<False> {};
-//
-//template<typename T>
-//struct isLit : std::false_type {};
-//
-//template<>
-//struct isLit<Lit<True>> : std::true_type {};
-//
-//template<>
-//struct isLit<Lit<False>> : std::true_type {};
-//
-//template<uint64_t n>
-//struct isLit<Lit<Fib<n>>> : std::true_type {};
-
 constexpr uint64_t Var(const char* arg) {
     if (!arg) throw std::invalid_argument("Invalid argument provided.");
 
