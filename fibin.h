@@ -206,6 +206,11 @@ private:
         using result = typename findVarValue<varId, Env>::result;
     };
 
+    template<uint64_t varId, typename Value, typename Expression, typename Env>
+    struct Eval<Let<varId, Value, Expression>, Env> {
+        using result = typename Eval<Expression, Environment<varId, typename Eval<Value, Env>::result, Env>>::result;
+    };
+
     template<uint64_t varId, typename Body, typename Env>
     struct Eval<Lambda<varId, Body>, Env> {
         using result = Func<varId, Body, Env>;
@@ -219,11 +224,6 @@ private:
     template<uint64_t varId, typename Body, typename funcEnv, typename Param, typename Env>
     struct Eval<Invoke<Func<varId, Body, funcEnv>, Param>, Env> {
         using result = typename Eval<Body, Environment<varId, typename Eval<Param, Env>::result, funcEnv>>::result;
-    };
-
-    template<uint64_t varId, typename Value, typename Expression, typename Env>
-    struct Eval<Let<varId, Value, Expression>, Env> {
-        using result = typename Eval<Expression, Environment<varId, typename Eval<Value, Env>::result, Env>>::result;
     };
 
 public:
