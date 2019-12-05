@@ -108,12 +108,6 @@ constexpr uint64_t Var(const char* arg) {
     return id;
 };
 
-template<uint64_t varId, typename Value, typename Expr>
-struct Let {};
-
-template<uint64_t varId>
-struct Ref {};
-
 template<typename Condition, typename Then, typename Else>
 struct If {};
 
@@ -128,6 +122,12 @@ struct Inc10 {};
 
 template<typename Left, typename Right>
 struct Eq {};
+
+template<uint64_t varId>
+struct Ref {};
+
+template<uint64_t varId, typename Value, typename Expr>
+struct Let {};
 
 template<typename ValueType>
 struct Fibin {
@@ -222,10 +222,13 @@ private:
 
     template<uint64_t varId, typename Env>
     struct Eval<Ref<varId>, Env> {
-        using result = findVarValue<varId, Env>;
+        using result = typename findVarValue<varId, Env>::result;
     };
 
-
+    template<uint64_t varId, typename Value, typename Expr, typename Env>
+    struct Eval<Let<varId, Value, Expr>, Env> {
+        using result = typename Eval<Expr, Environment<varId, typename Eval<Value, Env>::result, Env>>::result;
+    };
 
 public:
     template<typename Expr, typename V = ValueType>
