@@ -24,6 +24,24 @@ namespace {
         }
         return c;
     }
+
+    struct EmptyEnvironment {};
+
+    template<uint64_t varId, typename Value, typename Tail>
+    struct Environment {};
+
+    template<uint64_t varId, typename Environment>
+    struct findVarValue {};
+
+    template<uint64_t thisId, uint64_t varId, typename Value, typename Tail>
+    struct findVarValue<thisId, Environment<varId, Value, Tail>> {
+        using result = typename findVarValue<thisId, Tail>::result;
+    };
+
+    template<uint64_t varId, typename Value, typename Tail>
+    struct findVarValue<varId, Environment<varId, Value, Tail>> {
+        using result = Value;
+    };
 }
 
 template<uint64_t n>
@@ -89,6 +107,9 @@ constexpr uint64_t Var(const char* arg) {
     if (!len || (len == maxLen && arg[maxLen] != '\0')) throw std::range_error("Invalid variable name size provided.");
     return id;
 };
+
+template<uint64_t varId, typename Value, typename Expr>
+struct Let {};
 
 template<uint64_t varId>
 struct Ref {};
@@ -201,14 +222,16 @@ private:
 
     template<uint64_t varId, typename Env>
     struct Eval<Ref<varId>, Env> {
-        //
+        using result = findVarValue<varId, Env>;
     };
+
+
 
 public:
     template<typename Expr, typename V = ValueType>
     static constexpr typename std::enable_if<std::is_integral<V>::value, V>::type
     eval() {
-        return Eval<Expr, void>::result::value;
+        return Eval<Expr, EmptyEnvironment>::result::value;
     }
 
     template<typename Expr, typename V = ValueType>
