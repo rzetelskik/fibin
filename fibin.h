@@ -1,47 +1,27 @@
 #include <iostream>
 #include <type_traits>
 
-namespace {
-    constexpr bool isDigit(int c) {
-        return (unsigned)c - '0' < 10;
+constexpr bool isDigit(int c) {
+    return (unsigned)c - '0' < 10;
+}
+
+constexpr bool isAlpha(int c) {
+    return ((unsigned)c | 32) - 'a' < 26;
+}
+
+constexpr bool isAlnum(int c) {
+    return isDigit(c) | isAlpha(c);
+}
+
+constexpr bool isUpper(int c) {
+    return (unsigned)c - 'A' < 26;
+}
+
+constexpr int toLower(int c) {
+    if (isUpper(c)) {
+        c |= 32;
     }
-
-    constexpr bool isAlpha(int c) {
-        return ((unsigned)c | 32) - 'a' < 26;
-    }
-
-    constexpr bool isAlnum(int c) {
-        return isDigit(c) | isAlpha(c);
-    }
-
-    constexpr bool isUpper(int c) {
-        return (unsigned)c - 'A' < 26;
-    }
-
-    constexpr int toLower(int c) {
-        if (isUpper(c)) {
-            c |= 32;
-        }
-        return c;
-    }
-
-    struct EmptyEnvironment {};
-
-    template<uint64_t varId, typename Value, typename Tail>
-    struct Environment {};
-
-    template<uint64_t varId, typename Environment>
-    struct findVarValue {};
-
-    template<uint64_t thisId, uint64_t varId, typename Value, typename Tail>
-    struct findVarValue<thisId, Environment<varId, Value, Tail>> {
-        using result = typename findVarValue<thisId, Tail>::result;
-    };
-
-    template<uint64_t varId, typename Value, typename Tail>
-    struct findVarValue<varId, Environment<varId, Value, Tail>> {
-        using result = Value;
-    };
+    return c;
 }
 
 template<uint64_t n>
@@ -100,7 +80,7 @@ constexpr uint64_t Var(const char* arg) {
     while (len < maxLen && (c = arg[len]) != '\0') {
         if (!isAlnum(c)) throw std::invalid_argument("Non-alphanumeric character provided.");
 
-        id = (id << 8) | toLower(c);
+        id = (uint64_t)((uint64_t)(id << 8) | toLower(c));
         ++len;
     }
 
@@ -143,9 +123,25 @@ private:
         static constexpr ValueType value = n;
     };
 
-    template<ValueType n>
-    struct Boolean {
-        static constexpr ValueType value = n;
+    template<uint64_t varId, typename Body, typename Env>
+    struct Func {};
+
+    struct EmptyEnvironment {};
+
+    template<uint64_t varId, typename Value, typename Tail>
+    struct Environment {};
+
+    template<uint64_t varId, typename Environment>
+    struct findVarValue {};
+
+    template<uint64_t thisId, uint64_t varId, typename Value, typename Tail>
+    struct findVarValue<thisId, Environment<varId, Value, Tail>> {
+        using result = typename findVarValue<thisId, Tail>::result;
+    };
+
+    template<uint64_t varId, typename Value, typename Tail>
+    struct findVarValue<varId, Environment<varId, Value, Tail>> {
+        using result = Value;
     };
 
     template<typename Expr, typename Env>
@@ -153,12 +149,12 @@ private:
 
     template<typename Env>
     struct Eval<Lit<True>, Env> {
-        using result = Boolean<1>;
+        using result = True;
     };
 
     template<typename Env>
     struct Eval<Lit<False>, Env> {
-        using result = Boolean<0>;
+        using result = False;
     };
 
     template<typename Env>
@@ -173,16 +169,16 @@ private:
 
     template<uint64_t n, typename Env>
     struct Eval<Lit<Fib<n>>, Env> {
-        using result = Integral<Eval<Lit<Fib<n - 1>>, Env>::result::value + Eval<Lit<Fib<n - 2>>, Env>::result::value>;
+        using result = Integral<(ValueType)(Eval<Lit<Fib<n - 1>>, Env>::result::value + Eval<Lit<Fib<n - 2>>, Env>::result::value)>;
     };
 
     template<typename Then, typename Else, typename Env>
-    struct Eval<If<Lit<True>, Then, Else>, Env> {
+    struct Eval<If<True, Then, Else>, Env> {
         using result = typename Eval<Then, Env>::result;
     };
 
     template<typename Then, typename Else, typename Env>
-    struct Eval<If<Lit<False>, Then, Else>, Env> {
+    struct Eval<If<False, Then, Else>, Env> {
         using result = typename Eval<Else, Env>::result;
     };
 
@@ -231,16 +227,25 @@ private:
         using result = typename findVarValue<varId, Env>::result;
     };
 
+    template<uint64_t varId, typename Body, typename Env>
+    struct Eval<Lambda<varId, Body>, Env> {
+        using result = Func<varId, Body, Env>;
+    };
+
+    template<typename Fun, typename Param, typename Env>
+    struct Eval<Invoke<Fun, Param>, Env> {
+        using result = typename Eval<Invoke<typename Eval<Fun, Env>::result, Param>, Env>::result;
+    };
+
+    template<uint64_t varId, typename Body, typename funcEnv, typename Param, typename Env>
+    struct Eval<Invoke<Func<varId, Body, funcEnv>, Param>, Env> {
+        using result = typename Eval<Body, Environment<varId, typename Eval<Param, Env>::result, funcEnv>>::result;
+    };
+
     template<uint64_t varId, typename Value, typename Expression, typename Env>
     struct Eval<Let<varId, Value, Expression>, Env> {
         using result = typename Eval<Expression, Environment<varId, typename Eval<Value, Env>::result, Env>>::result;
     };
-
-//    template<uint64_t varId, typename Body, typename Env>
-//    struct Eval<Lambda<>, Env> { };
-//
-//    template<typename Fun, typename Param, typename Env>
-//    struct Eval<Invoke<Fun, Param>, Env> {};
 
 public:
     template<typename Expr, typename V = ValueType>
