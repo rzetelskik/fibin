@@ -126,8 +126,14 @@ struct Eq {};
 template<uint64_t varId>
 struct Ref {};
 
-template<uint64_t varId, typename Value, typename Expr>
+template<uint64_t varId, typename Value, typename Expression>
 struct Let {};
+
+template<uint64_t varId, typename Body>
+struct Lambda {};
+
+template<typename Fun, typename Param>
+struct Invoke {};
 
 template<typename ValueType>
 struct Fibin {
@@ -225,10 +231,16 @@ private:
         using result = typename findVarValue<varId, Env>::result;
     };
 
-    template<uint64_t varId, typename Value, typename Expr, typename Env>
-    struct Eval<Let<varId, Value, Expr>, Env> {
-        using result = typename Eval<Expr, Environment<varId, typename Eval<Value, Env>::result, Env>>::result;
+    template<uint64_t varId, typename Value, typename Expression, typename Env>
+    struct Eval<Let<varId, Value, Expression>, Env> {
+        using result = typename Eval<Expression, Environment<varId, typename Eval<Value, Env>::result, Env>>::result;
     };
+
+//    template<uint64_t varId, typename Body, typename Env>
+//    struct Eval<Lambda<>, Env> { };
+//
+//    template<typename Fun, typename Param, typename Env>
+//    struct Eval<Invoke<Fun, Param>, Env> {};
 
 public:
     template<typename Expr, typename V = ValueType>
@@ -240,7 +252,7 @@ public:
     template<typename Expr, typename V = ValueType>
     static constexpr typename std::enable_if<!std::is_integral<V>::value>::type
     eval() {
-        std::cout << "Fibin doesn't support: PKc" << std::endl;
+        std::cout << "Fibin doesn't support: " << typeid(V).name() << std::endl;
     }
 };
 

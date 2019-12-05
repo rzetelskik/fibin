@@ -16,6 +16,10 @@ private:
     std::streambuf * old;
 };
 
+//BOOST_AUTO_TEST_CASE(non_compile) {
+//    Lit<char>;
+//}
+
 BOOST_AUTO_TEST_CASE(eval_void) {
     boost::test_tools::output_test_stream output;
     {
