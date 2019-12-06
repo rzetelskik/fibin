@@ -200,37 +200,3 @@ BOOST_AUTO_TEST_CASE(provided) {
 
     BOOST_CHECK(output.is_equal("Fibin doesn't support: PKc\n"));
 }
-
-/**
-template<Var skonwertowany do typu liczbowego, expression val - typename, body>
-class Let
-
-wszystkie sruktury maja byc pustymi szablonami do pattern matchingu
-
-struct Eval<If<True,Then,Else>>
- using result = typename Eval<Then>::result;
-
-
- eval<>()
-Eval<T>::result::value;
- oddzielic struktury od ewaluacji
-
- let dodaje zmienne do srodowiska
- mapy nie dodajemy!!!
- ma dzialac w trakcie kompilacji!
- stworzyc strukture rekurencyjna, ktora dodaje cos do srodowiska
-
- musi byc szablon find, ktora znajduje cos w srodowisku
-
-
- struct EmptyEnvironment
-
- <Name, Value, Environment>
-
- dodanie x:
- Environment<x, Lit<1>, Empty>
- dodanie y:
- Environment<y, Lit<2>, Environment>
-
- Eval<If(cond), Then, Else> = Eval<If<Eval<Cond>...
-**/
