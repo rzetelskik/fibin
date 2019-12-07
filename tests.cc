@@ -16,21 +16,131 @@ private:
     std::streambuf * old;
 };
 
-BOOST_AUTO_TEST_CASE(moodle_forum) {
-    BOOST_STATIC_ASSERT(Fibin<uint64_t>::eval<Invoke<Let<Var("x"), Lit<Fib<0>>, Lambda<Var("x"), Ref<Var("x")>>>, Lit<Fib<1>>>>() == 1);
+BOOST_AUTO_TEST_CASE(moodle_not_compile) {
 
-//    BOOST_STATIC_ASSERT(Fibin<int>::eval<Let<If<Lit<True>, Var("x"), Lit<Fib<2>>>, Lit<Fib<3>>, Ref<Var("x")>>>());   // Shouldn't compile
+//    Fibin<int>::eval<
+//        Let<
+//            If<
+//                Lit<True>,
+//                Var("x"),
+//                Lit<Fib<2>>
+//            >,
+//            Lit<Fib<3>>,
+//            Ref<Var("x")>
+//        >>();       // Shouldn't compile
 
-//    BOOST_STATIC_ASSERT(Fibin<int>::eval<Let<If<Lit<True>, Var("x"), Var("x")>, Lit<Fib<3>>, Ref<Var("x")>>>());      // Shouldn't compile
+//    Fibin<int>::eval<
+//        Let<
+//            If<
+//                Lit<True>,
+//                Var("x"),
+//                Var("x")
+//            >,
+//            Lit<Fib<3>>,
+//            Ref<Var("x")>>
+//        >();      // Shouldn't compile
 
-//    BOOST_STATIC_ASSERT(Fibin<std::uint32_t>::eval<Let<Var("f"),
+//    Fibin<std::uint32_t>::eval<
+//        Let<
+//            Var("f"),
 //            Lambda<
 //                Var("x"),
 //                If<
-//                    Eq<Ref<Var("x")>, Lit<Fib<5>>>,
+//                    Eq<
+//                        Ref<Var("x")>,
+//                        Lit<Fib<5>>
+//                    >,
 //                    Lit<Fib<0>>,
-//                        Invoke<Ref<Var("f")>, Lit<Fib<5>>>>>,
-//                        Invoke<Ref<Var("f")>, Lit<Fib<0>>>>());     // Shouldn't compile
+//                    Invoke<
+//                        Ref<Var("f")>,
+//                        Lit<Fib<5>>
+//                    >
+//                >
+//            >,
+//            Invoke<
+//                Ref<Var("f")>,
+//                Lit<Fib<0>>
+//                >
+//        >>();     // Shouldn't compile
+
+//    Fibin<std::uint32_t>::eval<
+//        Let<
+//            Var("f"),
+//            Lambda<
+//                Var("x"),
+//                Ref<Var("x")>
+//            >,
+//            Ref<Var("f")>
+//        >
+//    >();         // Shouldn't compile
+
+//    Fibin<std::uint32_t>::eval<
+//        Let<
+//            Var("t"),
+//            Lit<True>,
+//            Ref<Var("t")>
+//        >
+//    >();         // Shouldn't compile
+
+    // Eq function with number
+    Fibin<int>::eval<
+        Eq<
+            Lambda<
+                Var("x"),
+                Ref<Var("x")>
+                >,
+            Lit<Fib<5>>
+        >
+    >();
+
+    // Eq function with boolean
+    Fibin<int>::eval<
+        Eq<
+            Lambda<
+                Var("x"),
+                Ref<Var("x")>
+            >,
+            Lit<True>
+        >
+    >();
+
+    // Eq function with function
+    Fibin<int>::eval<
+        Eq<
+            Lambda<
+                Var("x"),
+                Fib<5>
+            >,
+            Lambda<
+                Var("y"),
+                Ref<Var("y")>
+            >
+        >
+    >();
+
+}
+
+BOOST_AUTO_TEST_CASE(moodle_compiles) {
+
+    // Should compile
+    Fibin<std::uint32_t>::eval<
+        Let<
+            Var("t"),
+            Lit<True>,
+            If<
+                Ref<Var("t")>,
+                Lit<Fib<0>>,
+                Lit<Fib<1>>
+            >
+        >
+    >();
+
+
+}
+
+BOOST_AUTO_TEST_CASE(moodle_returns_value) {
+
+    BOOST_STATIC_ASSERT(Fibin<uint64_t>::eval<Invoke<Let<Var("x"), Lit<Fib<0>>, Lambda<Var("x"), Ref<Var("x")>>>, Lit<Fib<1>>>>() == 1);
 
     BOOST_STATIC_ASSERT(Fibin<int>::eval<Let<
         Var("const"),
@@ -55,37 +165,19 @@ BOOST_AUTO_TEST_CASE(moodle_forum) {
         >
         >>() == 1);
 
-//    BOOST_STATIC_ASSERT(
-//        Let<
-//            Var("X"),
-//            Lit<Fib<0>>
-//            Invoke <
-//                Lambda<
-//                    Var("X"),
-//                    Ref<Var("X")>,
-//                    Lit<Fib<1>>
-//                >
-//            >
-//        > == 1);  // TODO
-
-//    BOOST_STATIC_ASSERT(Fibin<std::uint32_t>::eval<
-//        Let<
-//            Var("f"),
-//            Lambda<
-//                Var("x"),
-//                Ref<Var("x")>
-//            >,
-//            Ref<Var("f")>
-//        >
-//    >());         // Shouldn't compile
-
-//    BOOST_STATIC_ASSERT(Fibin<std::uint32_t>::eval<
-//        Let<
-//            Var("t"),
-//            Lit<True>,
-//            Ref<Var("t")>
-//        >
-//    >());         // Shouldn't compile
+    BOOST_STATIC_ASSERT(Fibin<int>::eval<
+        Let<
+            Var("X"),
+            Lit<Fib<0>>,
+            Invoke <
+                Lambda<
+                    Var("X"),
+                    Ref<Var("X")>
+                    >,
+                Lit<Fib<1>>
+                >
+            >
+        >() == 1);
 
     BOOST_STATIC_ASSERT(Fibin<std::uint32_t>::eval<
         Let<
@@ -99,20 +191,20 @@ BOOST_AUTO_TEST_CASE(moodle_forum) {
         >
     >() == 0);
 
-//    BOOST_STATIC_ASSERT(Fibin<std::uint32_t>::eval<
-//        Let<
-//            Var("tf"),
-//            Lambda<
-//                Var("x"),
-//                Lit<true>
-//            >,
-//            If<
-//                Invoke<Ref<Var("tf")>, Lit<False>>,
-//                Lit<Fib<0>>,
-//                Lit<Fib<1>>
-//            >
-//        >
-//    >());       // TODO
+    BOOST_STATIC_ASSERT(Fibin<std::uint32_t>::eval<
+        Let<
+            Var("tf"),
+            Lambda<
+                Var("x"),
+                Lit<True>
+            >,
+            If<
+                Invoke<Ref<Var("tf")>, Lit<False>>,
+                Lit<Fib<0>>,
+                Lit<Fib<1>>
+            >
+        >
+    >() == 0);
 }
 
 //BOOST_AUTO_TEST_CASE(non_compile) {
@@ -169,7 +261,7 @@ BOOST_AUTO_TEST_CASE(inc10) {
 }
 
 
-//TODO should this compile?
+//TODO should this compile?`
 //BOOST_AUTO_TEST_CASE(eq) {
 //    BOOST_STATIC_ASSERT(Fibin<int>::eval<Eq<Lit<Fib<1>>, Lit<Fib<1>>>>() == 1);
 //    BOOST_STATIC_ASSERT(Fibin<bool>::eval<Eq<Lit<Fib<1>>, Lit<Fib<0>>>>() == false);
