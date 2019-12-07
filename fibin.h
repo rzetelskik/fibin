@@ -1,3 +1,6 @@
+#ifndef FIBIN_H
+#define FIBIN_H
+
 #include <iostream>
 #include <type_traits>
 
@@ -148,7 +151,11 @@ private:
 
     template<uint64_t n, typename Env>
     struct Eval<Lit<Fib<n>>, Env> {
-        using result = Integral<(ValueType)(Eval<Lit<Fib<n - 1>>, Env>::result::value + Eval<Lit<Fib<n - 2>>, Env>::result::value)>;
+    private:
+        using first = typename Eval<Lit<Fib<n - 1>>, Env>::result;
+        using second = typename Eval<Lit<Fib<n - 2>>, Env>::result;
+    public:
+        using result = Integral<static_cast<ValueType>(first::value + second::value)>;
     };
 
     template<typename Then, typename Else, typename Env>
@@ -188,7 +195,11 @@ private:
 
     template<typename Left, typename Right, typename Env>
     struct Eval<Eq<Left, Right>, Env> {
-        using result = typename Eval<Eq<typename Eval<Left, Env>::result, typename Eval<Right, Env>::result>, Env>::result;
+    private:
+        using leftRes = typename Eval<Left, Env>::result;
+        using rightRes = typename Eval<Right, Env>::result;
+    public:
+        using result = typename Eval<Eq<leftRes, rightRes>, Env>::result;
     };
 
     template<ValueType n, ValueType m, typename Env>
@@ -239,5 +250,7 @@ public:
         std::cout << "Fibin doesn't support: " << typeid(V).name() << std::endl;
     }
 };
+
+#endif
 
 

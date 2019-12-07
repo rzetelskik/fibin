@@ -82,41 +82,41 @@ BOOST_AUTO_TEST_CASE(moodle_not_compile) {
 //        >
 //    >();         // Shouldn't compile
 
-    // Eq function with number
-    Fibin<int>::eval<
-        Eq<
-            Lambda<
-                Var("x"),
-                Ref<Var("x")>
-                >,
-            Lit<Fib<5>>
-        >
-    >();
+//    // Eq function with number
+//    Fibin<int>::eval<
+//        Eq<
+//            Lambda<
+//                Var("x"),
+//                Ref<Var("x")>
+//                >,
+//            Lit<Fib<5>>
+//        >
+//    >();
 
-    // Eq function with boolean
-    Fibin<int>::eval<
-        Eq<
-            Lambda<
-                Var("x"),
-                Ref<Var("x")>
-            >,
-            Lit<True>
-        >
-    >();
+//    // Eq function with boolean
+//    Fibin<int>::eval<
+//        Eq<
+//            Lambda<
+//                Var("x"),
+//                Ref<Var("x")>
+//            >,
+//            Lit<True>
+//        >
+//    >();
 
-    // Eq function with function
-    Fibin<int>::eval<
-        Eq<
-            Lambda<
-                Var("x"),
-                Fib<5>
-            >,
-            Lambda<
-                Var("y"),
-                Ref<Var("y")>
-            >
-        >
-    >();
+//    // Eq function with function
+//    Fibin<int>::eval<
+//        Eq<
+//            Lambda<
+//                Var("x"),
+//                Fib<5>
+//            >,
+//            Lambda<
+//                Var("y"),
+//                Ref<Var("y")>
+//            >
+//        >
+//    >();
 
 }
 
