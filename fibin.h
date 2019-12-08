@@ -62,7 +62,7 @@ constexpr uint64_t Var(const char* arg) {
     while (len < maxLen && (c = arg[len]) != '\0') {
         if (!isAlnum(c)) throw std::invalid_argument("Non-alphanumeric character provided.");
 
-        id = (uint64_t)((uint64_t)(id << 8) | toLower(c));
+        id = static_cast<uint64_t>(static_cast<uint64_t>(id << 8) | toLower(c));
         ++len;
     }
 
