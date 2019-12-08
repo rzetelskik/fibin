@@ -237,6 +237,8 @@ BOOST_AUTO_TEST_CASE(var) {
     BOOST_STATIC_ASSERT(Var("abC") == Var("Abc"));
     BOOST_CHECK_THROW(Var("[]"), std::invalid_argument);
     BOOST_CHECK_THROW(Var("abcdefg"), std::range_error);
+    BOOST_CHECK_THROW(Var(nullptr), std::invalid_argument);
+    BOOST_CHECK_THROW(Var(""), std::range_error);
 }
 
 BOOST_AUTO_TEST_CASE(if_) {

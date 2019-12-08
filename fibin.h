@@ -53,7 +53,7 @@ template<typename T, typename = typename std::enable_if<(isBoolean<T>::value || 
 struct Lit {};
 
 constexpr uint64_t Var(const char* arg) {
-    if (!arg) throw std::invalid_argument("Invalid argument provided.");
+    if (!arg) throw std::invalid_argument("Invalid argument provided (nullptr).");
 
     constexpr int maxLen = 6;
     int len = 0, c = 0;
@@ -66,7 +66,7 @@ constexpr uint64_t Var(const char* arg) {
         ++len;
     }
 
-    if (!len || (len == maxLen && arg[maxLen] != '\0')) throw std::range_error("Invalid variable name size provided.");
+    if (!len || (len == maxLen && arg[maxLen] != '\0')) throw std::range_error("Variable of invalid name size provided.");
     return id;
 };
 
@@ -175,12 +175,20 @@ private:
 
     template<typename First, typename Second, typename ... Args, typename Env>
     struct Eval<Sum<First, Second, Args ...>, Env> {
-        using result = Integral<Eval<First, Env>::result::value + Eval<Sum<Second, Args ...>, Env>::result::value>;
+    private:
+        using firstRes = typename Eval<First, Env>::result;
+        using restRes = typename Eval<Sum<Second, Args ...>, Env>::result;
+    public:
+        using result = Integral<static_cast<ValueType>(firstRes::value + restRes ::value)>;
     };
 
     template<typename First, typename Second, typename Env>
     struct Eval<Sum<First, Second>, Env> {
-        using result = Integral<Eval<First, Env>::result::value + Eval<Second, Env>::result::value>;
+    private:
+        using firstRes = typename Eval<First, Env>::result;
+        using secondRes = typename Eval<Second, Env>::result;
+    public:
+        using result = Integral<static_cast<ValueType>(firstRes::value + secondRes::value)>;
     };
 
     template<typename T, typename Env>
